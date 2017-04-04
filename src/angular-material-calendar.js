@@ -209,6 +209,15 @@ angular.module("materialCalendar").directive("calendarMd", ["$compile", "$parse"
                 return !$scope.sameMonth(date);
             };
 
+            $scope.isToday = function(date){
+
+                var today = new Date();
+
+                today.setHours(0, 0, 0, 0);
+
+                return today.getTime() == date.getTime();
+            };
+
             $scope.calendarDirection = $scope.calendarDirection || "horizontal";
 
             $scope.$watch("calendarDirection", function (val) {
