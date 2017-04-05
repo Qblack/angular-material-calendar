@@ -125,7 +125,7 @@ angular.module("materialCalendar").service("MaterialCalendarData", [function () 
 
 angular.module("materialCalendar").directive("calendarMd", ["$compile", "$parse", "$http", "$q", "materialCalendar.Calendar", "MaterialCalendarData", function ($compile, $parse, $http, $q, Calendar, CalendarData) {
 
-    var defaultTemplate = "<md-content layout='column' layout-fill md-swipe-left='next()' md-swipe-right='prev()'> <md-toolbar> <div class='md-toolbar-tools pop-effect' layout='row'> <md-button class=\"md-icon-button\" ng-click='prev()' aria-label=\"Previous month\"> <md-tooltip ng-if=\"::tooltips()\">Previous month</md-tooltip> &laquo; </md-button> <div flex></div><h2 class='calendar-md-title'><span>{{calendar.start | date:titleFormat:timezone}}</span></h2> <div flex></div><md-button class=\"md-icon-button\" ng-click='next()' aria-label=\"Next month\"> <md-tooltip ng-if=\"::tooltips()\">Next month</md-tooltip> &raquo; </md-button> </div></md-toolbar> <md-content ng-if='weekLayout !==columnWeekLayout' flex layout=\"column\" class='calendar'> <div layout='row' class='subheader'> <div layout-padding class='subheader-day' flex ng-repeat='day in calendar.weeks[0]'> <md-tooltip ng-if=\"::tooltips()\">{{day | date:dayLabelTooltipFormat}}</md-tooltip>{{day | date:dayLabelFormat}}</div></div><div ng-if='week.length' ng-repeat='week in calendar.weeks track by $index' flex layout='row'> <div tabindex='{{sameMonth(day) ? (day | date:dayFormat:timezone) : 0}}' ng-repeat='day in week track by $index' ng-click='handleDayClick(day)' flex layout layout-padding ng-class='{\"disabled\" : isDisabled(day), \"active\": isActive(day), \"md-whiteframe-12dp\": hover || focus}' ng-focus='focus=true;' ng-blur='focus=false;' ng-mouseleave=\"hover=false\" data-ng-style=\"{'background-color': isToday(day) ? '#F0FBFF' : ''}\" ng-mouseenter=\"hover=true\"> <md-tooltip ng-if=\"::tooltips()\">{{day | date:dayTooltipFormat}}</md-tooltip> <div style=\"width: 100%;\" data-ng-style=\"{'overflow-y' : isActive(day) ? 'auto' : 'hidden', 'padding-right' : isActive(day) ? '1px' : '0px'}\" flex ng-bind-html='dataService.data[dayKey(day)]'></div></div></div></md-content></md-content>";
+    var defaultTemplate = "<div data-ng-include='templateUrl' style='width: 100%;'></div>";
 
     var injectCss = function () {
         var styleId = "calendarMdCss";
@@ -320,23 +320,9 @@ angular.module("materialCalendar").directive("calendarMd", ["$compile", "$parse"
                     weekStartsOn: $scope.weekStartsOn || 0
                 });
 
-                var deferred = $q.defer();
-                // Allows fetching of dynamic templates via $http.
-                if ($scope.templateUrl) {
-                    $http
-                        .get($scope.templateUrl)
-                        .success(deferred.resolve)
-                        .error(deferred.reject);
-                } else {
-                    deferred.resolve($scope.template() || defaultTemplate);
-                }
-
-                return deferred.promise;
+                return defaultTemplate;
 
             };
-
-
-
 
             $scope.dataService = CalendarData;
 
@@ -382,10 +368,10 @@ angular.module("materialCalendar").directive("calendarMd", ["$compile", "$parse"
             window.data = $scope.data;
 
             var bootstrap = function () {
-                init().then(function (contents) {
-                    setTemplate(contents);
-                    setData();
-                });
+
+                var contents = init();
+                setTemplate(contents);
+                setData();
             };
 
             // Modified code to allow for refreshing
